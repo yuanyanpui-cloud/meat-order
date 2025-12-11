@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>肉類自助落單系統</title>
+    <style>
+        :root {
+            --color-primary: #2180a0;
+            --color-primary-hover: #1a6b82;
+            --color-text: #213435;
+            --color-text-light: #627c7f;
+            --color-bg: #fcfcf9;
+            --color-surface: #ffffff;
+            --color-border: #d4d4ce;
+            --color-error: #c01537;
+            --color-success: #218091;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "微軟雅黑", sans-serif;
+            background: linear-gradient(135deg, #f5f3ee 0%, #faf8f3 100%);
+            color: var(--color-text);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--color-surface);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--color-primary);
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--color-text-light);
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .admin-panel {
+            background: #f0f0f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid var(--color-border);
+        }
+
+        .admin-btn {
+            background: var(--color-primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            margin: 0 4px;
+            transition: all 0.3s ease;
+        }
+
+        .admin-btn:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .products-overview {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(33, 128, 160, 0.08) 0%, rgba(33, 128, 160, 0.03) 100%);
+            border-radius: 10px;
+            border: 1px solid rgba(33, 128, 160, 0.15);
+        }
+
+        .overview-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .product-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 4px 8px rgba(33, 128, 160, 0.15);
+            border-color: var(--color-primary);
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: var(--color-text);
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .product-spec {
+            font-size: 12px;
+            color: var(--color-text-light);
+            margin-bottom: 8px;
+        }
+
+        .product-price {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--color-text);
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #fafaf8;
+            color: var(--color-text);
+            transition: border-color 0.3s ease, background 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            background: var(--color-surface);
+            box-shadow: 0 0 0 3px rgba(33, 128, 160, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 1fr 120px;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: #fafaf8;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+        }
+
+        .item-select {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .item-info {
+            font-size: 13px;
+            color: var(--color-text-light);
+        }
+
+        .price-display {
+            text-align: right;
+            padding-top: 8px;
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: var(--color-primary);
+            font-size: 16px;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(33, 128, 160, 0.05) 0%, rgba(33, 128, 160, 0.02) 100%);
+            border: 2px solid var(--color-primary);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .summary-label {
+            color: var(--color-text-light);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .summary-price {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+            box-shadow: 0 4px 12px rgba(33, 128, 160, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e8e8e3;
+            color: var(--color-text);
+            width: 100%;
+        }
+
+        .btn-secondary:hover {
+            background: #d8d8d0;
+        }
+
+        .order-summary {
+            background: #fafaf8;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .order-summary.show {
+            display: block;
+        }
+
+        .order-summary h3 {
+            color: var(--color-primary);
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--color-border);
+            font-size: 14px;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            padding-top: 8px;
+            margin-top: 8px;
+            padding-top: 12px;
+            border-top: 2px solid var(--color-border);
+            color: var(--color-primary);
+            font-size: 16px;
+        }
+
+        .copy-btn {
+            background: var(--color-primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .copy-btn:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--color-text-light);
+            font-size: 14px;
+            padding: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 24px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .item-row {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-price {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🥩 肉類自助落單系統</h1>
+        <p class="subtitle">快速方便的線上訂購</p>
+
+        <!-- 管理者面板 -->
+        <div class="admin-panel">
+            <button class="admin-btn" onclick="viewOrderLog()">📋 查看訂單日誌</button>
+            <button class="admin-btn" onclick="downloadOrderLog()">📥 下載訂單紀錄</button>
+            <button class="admin-btn" onclick="clearOrderLog()">🗑️ 清空日誌</button>
+        </div>
+
+        <!-- 產品總覽 -->
+        <div class="products-overview">
+            <h2 class="overview-title">📋 可訂購產品</h2>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-name">牛小排</div>
+                    <div class="product-spec">（每盒2磅）</div>
+                    <div class="product-price">$300/盒</div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">牛仔骨</div>
+                    <div class="product-spec">（散買）</div>
+                    <div class="product-price">$75/磅</div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">美國Prime牛扒半寸</div>
+                    <div class="product-spec">（散買）</div>
+                    <div class="product-price">$60/塊</div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">豬肋骨</div>
+                    <div class="product-spec">（散買）</div>
+                    <div class="product-price">$27/塊</div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">紐西蘭羊架</div>
+                    <div class="product-spec">（一包）</div>
+                    <div class="product-price">$300/包</div>
+                </div>
+            </div>
+        </div>
+
+        <form id="orderForm">
+            <!-- 客戶資料 -->
+            <div class="form-section">
+                <h2 class="section-title">客戶資料</h2>
+                <div class="form-group">
+                    <label for="customerName">姓名 <span style="color: var(--color-error);">*</span></label>
+                    <input type="text" id="customerName" name="customerName" required placeholder="請輸入您的姓名">
+                </div>
+            </div>
+
+            <!-- 訂購物品 -->
+            <div class="form-section">
+                <h2 class="section-title">訂購物品</h2>
+                <div id="itemsContainer"></div>
+                <button type="button" class="btn-secondary" onclick="addItemRow()" style="margin-top: 12px; padding: 10px;">+ 新增物品</button>
+            </div>
+
+            <!-- 備註 -->
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="remarks">備註 (選填)</label>
+                    <textarea id="remarks" name="remarks" placeholder="例如：只要新鮮部分、特別要求、送貨時間等"></textarea>
+                </div>
+            </div>
+
+            <!-- 總價 -->
+            <div class="summary-box">
+                <div class="summary-label">訂單總價</div>
+                <div class="summary-price" id="totalPrice">$0</div>
+            </div>
+
+            <!-- 按鈕組 -->
+            <div class="button-group">
+                <button type="button" class="btn-secondary" onclick="resetForm()">重設</button>
+                <button type="submit" class="btn-primary">生成訂單</button>
+            </div>
+        </form>
+
+        <!-- 訂單摘要 -->
+        <div class="order-summary" id="orderSummary">
+            <h3>訂單摘要</h3>
+            <div id="summaryContent"></div>
+            <button class="copy-btn" onclick="copyToClipboard()">📋 複製訂單</button>
+            <button class="copy-btn" onclick="confirmOrder()" style="background: var(--color-success); margin-top: 8px;">✅ 確認並記錄訂單</button>
+        </div>
+    </div>
+
+    <script>
+        const ITEMS = [
+            { name: '牛小排（每盒2磅）', price: 300, unit: '盒' },
+            { name: '牛仔骨', price: 75, unit: '磅' },
+            { name: '美國Prime牛扒半寸', price: 60, unit: '塊' },
+            { name: '豬肋骨', price: 27, unit: '塊' },
+            { name: '紐西蘭羊架', price: 300, unit: '包' }
+        ];
+
+        let itemCount = 1;
+
+        function initializeForm() {
+            const container = document.getElementById('itemsContainer');
+            container.innerHTML = '';
+            itemCount = 1;
+            addItemRow();
+        }
+
+        function addItemRow() {
+            const container = document.getElementById('itemsContainer');
+            const rowId = `item-${itemCount}`;
+            itemCount++;
+
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            row.id = rowId;
+            row.innerHTML = `
+                <div class="item-select">
+                    <label for="${rowId}-product">選擇物品</label>
+                    <select id="${rowId}-product" class="product-select" onchange="updatePrice()">
+                        <option value="">-- 請選擇 --</option>
+                        ${ITEMS.map((item, idx) => `<option value="${idx}" data-price="${item.price}">${item.name} ($${item.price}/${item.unit})</option>`).join('')}
+                    </select>
+                    <div class="item-info" id="${rowId}-info"></div>
+                </div>
+                <div>
+                    <label for="${rowId}-qty">數量</label>
+                    <input type="number" id="${rowId}-qty" class="quantity-input" value="1" min="0" onchange="updatePrice()" onkeyup="updatePrice()">
+                </div>
+                <div class="price-display">
+                    <label>小計</label>
+                    <div class="item-price" id="${rowId}-subtotal">$0</div>
+                </div>
+                <button type="button" class="btn-secondary" onclick="removeItemRow('${rowId}')" style="margin-top: 24px; padding: 8px; height: 40px;">刪除</button>
+            `;
+
+            container.appendChild(row);
+        }
+
+        function removeItemRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) {
+                row.remove();
+                updatePrice();
+            }
+        }
+
+        function updatePrice() {
+            let total = 0;
+            const rows = document.querySelectorAll('.item-row');
+
+            rows.forEach((row) => {
+                const productSelect = row.querySelector('.product-select');
+                const qtyInput = row.querySelector('.quantity-input');
+                const subtotalDiv = row.querySelector('[id$="-subtotal"]');
+                const infoDiv = row.querySelector('[id$="-info"]');
+
+                if (productSelect.value !== '') {
+                    const itemIdx = parseInt(productSelect.value);
+                    const item = ITEMS[itemIdx];
+                    const qty = parseInt(qtyInput.value) || 0;
+                    const subtotal = item.price * qty;
+                    total += subtotal;
+
+                    subtotalDiv.textContent = `$${subtotal}`;
+                    infoDiv.textContent = `${item.name} x ${qty}`;
+                } else {
+                    subtotalDiv.textContent = '$0';
+                    infoDiv.textContent = '';
+                }
+            });
+
+            document.getElementById('totalPrice').textContent = `$${total}`;
+        }
+
+        function resetForm() {
+            document.getElementById('orderForm').reset();
+            document.getElementById('orderSummary').classList.remove('show');
+            initializeForm();
+        }
+
+        function generateOrderSummary() {
+            const customerName = document.getElementById('customerName').value;
+            const remarks = document.getElementById('remarks').value;
+            const totalPrice = document.getElementById('totalPrice').textContent;
+
+            let summaryHTML = `
+                <div class="summary-item">
+                    <strong>客戶姓名:</strong>
+                    <span>${customerName || '未填寫'}</span>
+                </div>
+            `;
+
+            const rows = document.querySelectorAll('.item-row');
+            let itemsCount = 0;
+
+            rows.forEach((row) => {
+                const productSelect = row.querySelector('.product-select');
+                const qtyInput = row.querySelector('.quantity-input');
+
+                if (productSelect.value !== '' && parseInt(qtyInput.value) > 0) {
+                    const itemIdx = parseInt(productSelect.value);
+                    const item = ITEMS[itemIdx];
+                    const qty = parseInt(qtyInput.value);
+                    const subtotal = item.price * qty;
+                    itemsCount++;
+
+                    summaryHTML += `
+                        <div class="summary-item">
+                            <span>${item.name} x ${qty}</span>
+                            <span>$${subtotal}</span>
+                        </div>
+                    `;
+                }
+            });
+
+            if (itemsCount === 0) {
+                summaryHTML += '<div class="empty-state">未有選擇任何物品</div>';
+            } else {
+                summaryHTML += `
+                    <div class="summary-item">
+                        <span>小計</span>
+                        <span>${totalPrice}</span>
+                    </div>
+                `;
+            }
+
+            if (remarks) {
+                summaryHTML += `
+                    <div class="summary-item" style="margin-top: 12px; border-top: 2px solid var(--color-border); padding-top: 12px;">
+                        <strong>備註:</strong>
+                        <span style="text-align: right;">${remarks}</span>
+                    </div>
+                `;
+            }
+
+            document.getElementById('summaryContent').innerHTML = summaryHTML;
+            document.getElementById('orderSummary').classList.add('show');
+        }
+
+        function copyToClipboard() {
+            const customerName = document.getElementById('customerName').value;
+            const remarks = document.getElementById('remarks').value;
+            const totalPrice = document.getElementById('totalPrice').textContent;
+
+            let text = `🥩 肉類自助落單\n\n`;
+            text += `客戶姓名: ${customerName || '未填寫'}\n`;
+            text += `━━━━━━━━━━━━━\n`;
+
+            const rows = document.querySelectorAll('.item-row');
+            rows.forEach((row) => {
+                const productSelect = row.querySelector('.product-select');
+                const qtyInput = row.querySelector('.quantity-input');
+
+                if (productSelect.value !== '' && parseInt(qtyInput.value) > 0) {
+                    const itemIdx = parseInt(productSelect.value);
+                    const item = ITEMS[itemIdx];
+                    const qty = parseInt(qtyInput.value);
+                    const subtotal = item.price * qty;
+
+                    text += `${item.name} x ${qty} = $${subtotal}\n`;
+                }
+            });
+
+            text += `━━━━━━━━━━━━━\n`;
+            text += `訂單總價: ${totalPrice}\n`;
+
+            if (remarks) {
+                text += `\n備註: ${remarks}`;
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ 訂單已複製到剪貼簿！');
+            }).catch(() => {
+                alert('複製失敗，請手動複製');
+            });
+        }
+
+        function confirmOrder() {
+            const customerName = document.getElementById('customerName').value;
+            const remarks = document.getElementById('remarks').value;
+            const totalPrice = document.getElementById('totalPrice').textContent.replace('$', '');
+
+            let itemsList = [];
+            const rows = document.querySelectorAll('.item-row');
+            let totalQty = 0;
+
+            rows.forEach((row) => {
+                const productSelect = row.querySelector('.product-select');
+                const qtyInput = row.querySelector('.quantity-input');
+
+                if (productSelect.value !== '' && parseInt(qtyInput.value) > 0) {
+                    const itemIdx = parseInt(productSelect.value);
+                    const item = ITEMS[itemIdx];
+                    const qty = parseInt(qtyInput.value);
+                    itemsList.push(`${item.name} x ${qty}`);
+                    totalQty++;
+                }
+            });
+
+            if (totalQty === 0) {
+                alert('請至少選擇一件物品');
+                return;
+            }
+
+            // 建立訂單記錄
+            const orderRecord = {
+                timestamp: new Date().toLocaleString('zh-HK'),
+                customerName: customerName,
+                items: itemsList.join(', '),
+                totalPrice: totalPrice,
+                remarks: remarks
+            };
+
+            // 保存到 LocalStorage
+            let orders = JSON.parse(localStorage.getItem('meatOrders') || '[]');
+            orders.push(orderRecord);
+            localStorage.setItem('meatOrders', JSON.stringify(orders));
+
+            alert(`✅ 訂單已記錄！\n\n客戶: ${customerName}\n總額: $${totalPrice}\n\n目前共有 ${orders.length} 筆訂單`);
+            
+            document.getElementById('orderSummary').classList.remove('show');
+            resetForm();
+        }
+
+        function viewOrderLog() {
+            const orders = JSON.parse(localStorage.getItem('meatOrders') || '[]');
+            if (orders.length === 0) {
+                alert('目前沒有任何訂單紀錄');
+                return;
+            }
+
+            let logText = '=== 訂單日誌 ===\n\n';
+            orders.forEach((order, index) => {
+                logText += `[第 ${index + 1} 筆訂單]\n`;
+                logText += `時間: ${order.timestamp}\n`;
+                logText += `客戶: ${order.customerName}\n`;
+                logText += `物品: ${order.items}\n`;
+                logText += `總價: $${order.totalPrice}\n`;
+                if (order.remarks) {
+                    logText += `備註: ${order.remarks}\n`;
+                }
+                logText += `━━━━━━━━━━━━━\n\n`;
+            });
+
+            alert(logText);
+        }
+
+        function downloadOrderLog() {
+            const orders = JSON.parse(localStorage.getItem('meatOrders') || '[]');
+            if (orders.length === 0) {
+                alert('目前沒有任何訂單紀錄');
+                return;
+            }
+
+            let logText = '肉類訂單系統 - 訂單日誌\n';
+            logText += `生成時間: ${new Date().toLocaleString('zh-HK')}\n`;
+            logText += `========================================\n\n`;
+
+            orders.forEach((order, index) => {
+                logText += `【第 ${index + 1} 筆訂單】\n`;
+                logText += `時間: ${order.timestamp}\n`;
+                logText += `客戶姓名: ${order.customerName}\n`;
+                logText += `訂購物品: ${order.items}\n`;
+                logText += `訂單總價: $${order.totalPrice}\n`;
+                if (order.remarks) {
+                    logText += `特別要求: ${order.remarks}\n`;
+                }
+                logText += `────────────────────────────\n\n`;
+            });
+
+            logText += `========================================\n`;
+            logText += `總訂單數: ${orders.length}\n`;
+            logText += `生成時間: ${new Date().toLocaleString('zh-HK')}\n`;
+
+            // 下載為文字檔
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(logText));
+            element.setAttribute('download', `訂單紀錄_${new Date().toISOString().slice(0, 10)}.txt`);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+
+            alert('✅ 訂單紀錄已下載！');
+        }
+
+        function clearOrderLog() {
+            if (confirm('確定要清空所有訂單紀錄嗎？此操作無法復原！')) {
+                localStorage.removeItem('meatOrders');
+                alert('✅ 訂單紀錄已清空');
+            }
+        }
+
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const customerName = document.getElementById('customerName').value.trim();
+            if (!customerName) {
+                alert('請輸入姓名');
+                return;
+            }
+
+            const hasItems = Array.from(document.querySelectorAll('.product-select')).some(
+                (select) => select.value !== '' && parseInt(select.closest('.item-row').querySelector('.quantity-input').value) > 0
+            );
+
+            if (!hasItems) {
+                alert('請至少選擇一件物品');
+                return;
+            }
+
+            generateOrderSummary();
+        });
+
+        // 初始化
+        initializeForm();
+    </script>
+</body>
+</html>
